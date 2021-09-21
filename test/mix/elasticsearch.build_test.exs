@@ -131,22 +131,11 @@ defmodule Mix.Tasks.Elasticsearch.BuildTest do
       end
     end
 
-    test "raises error if errors occur during indexing" do
+    test "if an error is encountered during indexing, log it and continue" do
       populate_posts_table(1)
-
       {:ok, pid} = ErrorCluster.start_link(api: BulkErrorAPI)
-
-      assert_raise Mix.Error,
-                   """
-                   Index created, but not aliased: posts
-                   The following errors occurred:
-
-                       %Elasticsearch.Exception{col: nil, line: nil, message: \"reason\", query: nil, raw: %{\"error\" => %{\"reason\" => \"reason\", \"type\" => \"type\"}}, status: nil, type: \"type\"}\n
-                   """,
-                   fn ->
-                     rerun("elasticsearch.build", ["posts", "--cluster", inspect(ErrorCluster)])
-                   end
-
+      assert rerun("elasticsearch.build", ["posts", "--cluster", inspect(ErrorCluster)]) == [:ok]
+      # TODO: Test that the error is logged.
       Process.exit(pid, :kill)
     end
 
