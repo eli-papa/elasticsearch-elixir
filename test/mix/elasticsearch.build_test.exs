@@ -134,8 +134,12 @@ defmodule Mix.Tasks.Elasticsearch.BuildTest do
     test "if an error is encountered during indexing, log it and continue" do
       populate_posts_table(1)
       {:ok, pid} = ErrorCluster.start_link(api: BulkErrorAPI)
-      assert rerun("elasticsearch.build", ["posts", "--cluster", inspect(ErrorCluster)]) == [:ok]
-      # TODO: Test that the error is logged.
+
+      assert capture_log([level: :warn], fn ->
+               assert rerun("elasticsearch.build", ["posts", "--cluster", inspect(ErrorCluster)]) ==
+                        [:ok]
+             end) =~ "[Elasticsearch] upload error"
+
       Process.exit(pid, :kill)
     end
 
