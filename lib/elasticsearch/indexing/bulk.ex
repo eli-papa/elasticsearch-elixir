@@ -87,7 +87,14 @@ defmodule Elasticsearch.Index.Bulk do
           :ok | {:error, [map]}
   def upload(cluster, index_name, index_config, errors \\ [])
   def upload(_cluster, _index_name, %{sources: []}, []), do: :ok
-  def upload(_cluster, _index_name, %{sources: []}, errors), do: {:error, errors}
+
+  def upload(_cluster, _index_name, %{sources: []}, errors) do
+    for error <- errors do
+      Logger.warn("[Elasticsearch] upload error: #{inspect(error)}")
+    end
+
+    :ok
+  end
 
   def upload(
         cluster,
