@@ -37,7 +37,7 @@ defmodule Elasticsearch.Index.BulkTest do
     # Regression test for https://github.com/danielberkompas/elasticsearch-elixir/issues/10
     @tag :regression
     test "calls itself recursively properly" do
-      assert {:error, [%TestException{}]} =
+      assert :ok =
                Bulk.upload(Cluster, :posts, %{store: Store, sources: [Post]}, [
                  %TestException{}
                ])
@@ -46,7 +46,7 @@ defmodule Elasticsearch.Index.BulkTest do
     test "collects errors properly" do
       populate_posts_table(1)
 
-      assert {:error, [%Elasticsearch.Exception{type: "type", message: "reason"}]} =
+      assert :ok =
                Cluster
                |> Elasticsearch.Cluster.Config.get()
                |> Map.put(:api, ErrorAPI)
